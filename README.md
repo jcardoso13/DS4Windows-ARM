@@ -49,13 +49,56 @@ testing on physical Windows ARM hardware. On ARM64, accepting an update opens
 this fork's releases page for a manual ZIP update instead of running the upstream
 x64-only updater.
 
-To rebuild the ARM64 dependencies locally, install Visual Studio 2022 with the
-ARM64 C++ build tools, a Windows SDK, CMake 3.24 or newer, and the .NET 8 SDK:
+To build the ARM64 executable locally on Windows (x64 or ARM64), install:
+
+- Visual Studio 2022 or newer (including Build Tools) with the Desktop development
+  with C++ workload, the MSVC ARM64/ARM64EC build tools, and a Windows SDK.
+- CMake 3.24 or newer with a generator for your Visual Studio version, and the
+  .NET 8 SDK, both available on `PATH`. Newer Visual Studio releases may require
+  a newer CMake.
+- Internet access for downloading the pinned dependency sources and NuGet packages.
+
+From the repository root, run the build script in PowerShell:
 
 ```powershell
-cmake -S utils/arm64 -B bin/arm64-deps -G "Visual Studio 17 2022" -A ARM64
+.\utils\build-arm64.ps1
+```
+
+The script builds the dependencies, publishes the app, and verifies that the EXE
+and both native DLLs are ARM64. It stops if any build command fails.
+Both the local script and the release workflow use `utils/configure-arm64.ps1`
+to discover ARM64-capable Visual Studio installations through `vswhere`, then
+select the newest installation supported by CMake. The chosen generator and
+installation path are logged. Configuration refreshes the CMake cache to avoid
+stale generator or installation settings after toolchain upgrades.
+The executable is written to `bin/arm64/Release/output/DS4Windows.exe`.
+Keep the entire output folder together when copying the application to your
+Windows ARM device; this is not a single-file executable.
+
+To include the .NET runtime in the output instead of requiring a separate Desktop
+Runtime installation:
+
+```powershell
+.\utils\build-arm64.ps1 -SelfContained
+```
+
+The script can also be invoked from another directory using its full path.
+It does not install drivers, start the application, or publish a GitHub release.
+Linux/WSL cannot run this build because the native DLLs require the Windows
+Visual C++ toolchain.
+
+The equivalent manual commands are:
+
+```powershell
+.\utils\configure-arm64.ps1
 cmake --build bin/arm64-deps --config Release
 dotnet publish DS4Windows/DS4WinWPF.csproj -c Release -r win-arm64 --self-contained false /p:Platform=ARM64 -o bin/arm64/Release/output
+```
+
+Toolchain discovery regression tests can run in PowerShell without Visual Studio:
+
+```powershell
+.\utils\tests\configure-arm64.Tests.ps1
 ```
 
 ## Install

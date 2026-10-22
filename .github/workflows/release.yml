@@ -74,7 +74,8 @@ jobs:
         echo "VERSION=$VERSION" >> "$GITHUB_ENV"
         echo "SHORT_VERSION=${VERSION%-*}" >> "$GITHUB_ENV"
     - name: Configure ARM64 dependencies
-      run: cmake -S .\utils\arm64 -B .\bin\arm64-deps -G "Visual Studio 17 2022" -A ARM64
+      shell: pwsh
+      run: .\utils\configure-arm64.ps1
     - name: Build ARM64 dependencies
       run: cmake --build .\bin\arm64-deps --config Release
     - name: Build ARM64
