@@ -40,6 +40,8 @@ ViGEmClient, its managed wrapper, FakerInputDll, FakerInputWrapper, and SharpOSC
 from pinned upstream source revisions rather than reusing x64 DLLs. Before
 uploading the ZIP, it checks the executable's ARM64 machine type and loads both
 native DLLs in an ARM64 process.
+Dependency downloads do not configure upstream CMake projects; the ARM64 wrapper
+defines its own shared-library targets to avoid collisions with upstream targets.
 
 Install the ARM64 .NET 8 Desktop Runtime and the ARM64-capable ViGEmBus driver.
 The optional bundled HidHide and FakerInput driver installers only support x64
@@ -99,6 +101,14 @@ Toolchain discovery regression tests can run in PowerShell without Visual Studio
 
 ```powershell
 .\utils\tests\configure-arm64.Tests.ps1
+```
+
+To check that dependency fetching does not configure upstream projects or create
+duplicate targets, run the following command (requires CMake and internet access,
+but no Windows compiler):
+
+```powershell
+cmake -P utils/tests/arm64-fetchcontent.cmake
 ```
 
 ## Install

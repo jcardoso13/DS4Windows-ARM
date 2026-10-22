@@ -6,19 +6,25 @@ if(NOT MSVC OR NOT CMAKE_GENERATOR_PLATFORM STREQUAL "ARM64")
 endif()
 
 include(FetchContent)
+# Fetch sources without running upstream CMake projects; our targets are defined below.
 FetchContent_Declare(vigem_native
+    SOURCE_SUBDIR _ds4windows_download_only
     URL https://github.com/nefarius/ViGEmClient/archive/b66d02d57e32cc8595369c53418b843e958649b4.tar.gz
     URL_HASH SHA256=c2bc824cc96ed18cf0620b734ae552474f107e7e680485e5c0cb63e675d9f72a)
 FetchContent_Declare(vigem_managed
+    SOURCE_SUBDIR _ds4windows_download_only
     URL https://github.com/nefarius/ViGEm.NET/archive/2197a9a6200a1cc4cbefc19e4ef6c9bbb63ff567.tar.gz
     URL_HASH SHA256=e311e0dbb2fcdc35b88f06fbf5d6c714d186976479f59df7880ee6455e0abccc)
 FetchContent_Declare(faker_native
+    SOURCE_SUBDIR _ds4windows_download_only
     URL https://github.com/Ryochan7/FakerInputDll/archive/194f8752a5135765645986e7050f2ce5102f9ced.tar.gz
     URL_HASH SHA256=002eacc1bee29a578c242200da1c7aa72afb50a3e0e59a2ee4b241c144f7bd33)
 FetchContent_Declare(faker_managed
+    SOURCE_SUBDIR _ds4windows_download_only
     URL https://github.com/Ryochan7/FakerInputWrapper/archive/34c9f43825f6279ccd6dff8d062773993ce84889.tar.gz
     URL_HASH SHA256=7301da01c1b50e1b5e2b3aa30ecf2530491b6fff7ed9d3491fec6d2eaba009c3)
 FetchContent_Declare(sharposc
+    SOURCE_SUBDIR _ds4windows_download_only
     URL https://github.com/ValdemarOrn/SharpOSC/archive/06cfec49a4b2870f2edc00241bffda0f28b74708.tar.gz
     URL_HASH SHA256=aeec845a009a550a5c81fccf1ead4a816402251225fd7b8c2bdc9d404df00fcf)
 FetchContent_MakeAvailable(vigem_native vigem_managed faker_native faker_managed sharposc)
