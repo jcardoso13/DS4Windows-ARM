@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>$(DependencyName)</AssemblyName>
+    <PlatformTarget>ARM64</PlatformTarget>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(DependencySourceDir)/**/*.cs"
+             Exclude="$(DependencySourceDir)/**/obj/**;$(DependencySourceDir)/**/bin/**" />
+  </ItemGroup>
+  <Target Name="ValidateDependency" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(DependencyName)' == '' Or '$(DependencySourceDir)' == ''"
+           Text="DependencyName and DependencySourceDir must be supplied by the ARM64 dependency build." />
+  </Target>
+</Project>

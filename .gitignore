@@ -19,6 +19,7 @@
 [Rr]eleases/
 x64/
 x86/
+/DS4Windows/libs/ARM64/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -331,4 +332,3 @@ ASALocalRun/
 
 !DS4Windows/libs/x64/
 !DS4Windows/libs/x86/
-

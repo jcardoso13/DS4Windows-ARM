@@ -184,11 +184,11 @@ namespace DS4WinWPF
             string version = DS4Windows.Global.exeversion;
             logger.Info($"DS4Windows version {version}");
             logger.Info($"DS4Windows exe file: {DS4Windows.Global.exeFileName}");
-            logger.Info($"DS4Windows Assembly Architecture: {(Environment.Is64BitProcess ? "x64" : "x86")}");
+            logger.Info($"DS4Windows Assembly Architecture: {RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant()}");
             logger.Info($"OS Version: {Environment.OSVersion}");
             logger.Info($"OS Product Name: {DS4Windows.Util.GetOSProductName()}");
             logger.Info($"OS Release ID: {DS4Windows.Util.GetOSReleaseId()}");
-            logger.Info($"System Architecture: {(Environment.Is64BitOperatingSystem ? "x64" : "x86")}");
+            logger.Info($"System Architecture: {RuntimeInformation.OSArchitecture.ToString().ToLowerInvariant()}");
             logger.Info("Logger created");
 
             bool readAppConfig = DS4Windows.Global.Load();

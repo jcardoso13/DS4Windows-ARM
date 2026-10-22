@@ -20,6 +20,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Windows;
 using HttpProgress;
 using NonFormTimer = System.Timers.Timer;
@@ -86,7 +87,7 @@ namespace DS4WinWPF.DS4Forms
             }
 
             // Run checks for FakerInput driver
-            if (DS4Windows.Global.IsWin8OrGreater())
+            if (IsFakerInputControlCompatible())
             {
                 if (Environment.Is64BitOperatingSystem)
                 {
@@ -120,14 +121,15 @@ namespace DS4WinWPF.DS4Forms
         {
             // HidHide requires Windows 10 (or later) x64
             return DS4Windows.Global.IsWin10OrGreater() &&
-                Environment.Is64BitOperatingSystem;
+                RuntimeInformation.OSArchitecture == Architecture.X64;
         }
 
         private bool IsFakerInputControlCompatible()
         {
             // FakerInput works on Windows 8.1 and later. Going to attempt
             // to support x64 and x86 arch
-            return DS4Windows.Global.IsWin8OrGreater();
+            return DS4Windows.Global.IsWin8OrGreater() &&
+                RuntimeInformation.OSArchitecture != Architecture.Arm64;
         }
 
         private void FinishedBtn_Click(object sender, RoutedEventArgs e)

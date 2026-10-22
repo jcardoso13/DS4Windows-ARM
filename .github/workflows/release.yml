@@ -21,7 +21,7 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Set up Python 3.10
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
     - name: Restore dependencies
@@ -37,7 +37,7 @@ jobs:
     - name: Build X64
       run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release  /p:platform=x64 /p:AssemblyVersion=${{ env.SHORT_VERSION }} /p:FileVersion=${{ env.SHORT_VERSION }} /p:Version=${{ env.VERSION }} -o .\bin\x64\Release\output
     - name: Post-Build script X64
-      run: python .\utils\post-build.py .\bin\x64\Release\output . ${{env.VERSION}}
+      run: python .\utils\post-build.py .\bin\x64\Release\output .\DS4Windows ${{env.VERSION}}
     - name: Publish release Build X64
       run: gh release upload ${{github.event.release.tag_name}} .\bin\x64\Release\DS4Windows_${{env.VERSION}}_x64.zip
       env:
@@ -45,8 +45,59 @@ jobs:
     - name: Build X86
       run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release  /p:platform=x86 /p:AssemblyVersion=${{ env.SHORT_VERSION }} /p:FileVersion=${{ env.SHORT_VERSION }} /p:Version=${{ env.VERSION }} -o .\bin\x86\Release\output
     - name: Post-Build script X86
-      run: python .\utils\post-build.py .\bin\x86\Release\output . ${{env.VERSION}}
+      run: python .\utils\post-build.py .\bin\x86\Release\output .\DS4Windows ${{env.VERSION}}
     - name: Publish release Build X86
       run: gh release upload ${{github.event.release.tag_name}} .\bin\x86\Release\DS4Windows_${{env.VERSION}}_x86.zip
+      env:
+        GITHUB_TOKEN: ${{ github.TOKEN }}
+
+  release-arm64:
+    runs-on: windows-11-arm
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.release.tag_name }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.13"
+    - name: Set envars for versions
+      shell: bash
+      env:
+        TAG: ${{ github.event.release.tag_name }}
+      run: |
+        VERSION=${TAG#v}
+        echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+        echo "SHORT_VERSION=${VERSION%-*}" >> "$GITHUB_ENV"
+    - name: Configure ARM64 dependencies
+      run: cmake -S .\utils\arm64 -B .\bin\arm64-deps -G "Visual Studio 17 2022" -A ARM64
+    - name: Build ARM64 dependencies
+      run: cmake --build .\bin\arm64-deps --config Release
+    - name: Build ARM64
+      run: dotnet publish .\DS4Windows\DS4WinWPF.csproj -c Release -r win-arm64 --self-contained false /p:Platform=ARM64 /p:AssemblyVersion=${{ env.SHORT_VERSION }} /p:FileVersion=${{ env.SHORT_VERSION }} /p:Version=${{ env.VERSION }} -o .\bin\arm64\Release\output
+    - name: Verify ARM64 native dependencies
+      shell: pwsh
+      run: |
+        if ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture -ne 'Arm64') {
+          throw 'ARM64 validation must run in a native ARM64 process.'
+        }
+        foreach ($name in @('ViGEmClient.dll', 'FakerInputDll.dll')) {
+          $path = (Resolve-Path ".\bin\arm64\Release\output\$name").Path
+          $handle = [System.Runtime.InteropServices.NativeLibrary]::Load($path)
+          [System.Runtime.InteropServices.NativeLibrary]::Free($handle)
+        }
+        $exe = [System.IO.File]::ReadAllBytes((Resolve-Path '.\bin\arm64\Release\output\DS4Windows.exe').Path)
+        $pe = [System.BitConverter]::ToInt32($exe, 0x3c)
+        if ([System.BitConverter]::ToUInt16($exe, $pe + 4) -ne 0xaa64) {
+          throw 'DS4Windows.exe is not an ARM64 executable.'
+        }
+    - name: Post-Build script ARM64
+      run: python .\utils\post-build.py .\bin\arm64\Release\output .\DS4Windows ${{ env.VERSION }}
+    - name: Publish release Build ARM64
+      run: gh release upload ${{ github.event.release.tag_name }} .\bin\arm64\Release\DS4Windows_${{ env.VERSION }}_arm64.zip
       env:
         GITHUB_TOKEN: ${{ github.TOKEN }}

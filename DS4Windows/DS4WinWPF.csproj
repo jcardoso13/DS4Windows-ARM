@@ -4,8 +4,8 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
-		<Platforms>x64;x86</Platforms>
-		<RuntimeIdentifiers>win-x64;win-x86</RuntimeIdentifiers>
+		<Platforms>x64;x86;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
 		<RootNamespace>DS4WinWPF</RootNamespace>
 		<AssemblyName>DS4Windows</AssemblyName>
 		<ApplicationIcon>DS4W.ico</ApplicationIcon>
@@ -59,9 +59,24 @@
 		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Platform)'=='ARM64'">
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DefineConstants>$(DefineConstants);WIN64</DefineConstants>
+		<PlatformTarget>ARM64</PlatformTarget>
+		<RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+		<ErrorReport>none</ErrorReport>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<None Remove="libs\x64\**" Condition="'$(Platform)' != 'x64'" />
 		<None Remove="libs\x86\**" Condition="'$(Platform)' != 'x86'" />
+		<None Remove="libs\ARM64\**" Condition="'$(Platform)' != 'ARM64'" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -92,15 +107,15 @@
 		<PackageReference Include="WpfScreenHelper" Version="2.1.0" />
 
 		<Reference Include="FakerInputWrapper">
-			<HintPath>..\libs\$(Platform)\FakerInputWrapper\FakerInputWrapper.dll</HintPath>
+			<HintPath>libs\$(Platform)\FakerInputWrapper\FakerInputWrapper.dll</HintPath>
 		</Reference>
 
 		<Reference Include="SharpOSC">
-			<HintPath>..\libs\$(Platform)\SharpOSC\SharpOSC.dll</HintPath>
+			<HintPath>libs\$(Platform)\SharpOSC\SharpOSC.dll</HintPath>
 		</Reference>
 
 		<Reference Include="Nefarius.ViGEm.Client">
-			<HintPath>..\libs\$(Platform)\Nefarius.ViGEm.Client\Nefarius.ViGEm.Client.dll</HintPath>
+			<HintPath>libs\$(Platform)\Nefarius.ViGEm.Client\Nefarius.ViGEm.Client.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
@@ -388,6 +403,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="libs\ARM64\Nefarius.ViGEm.Client\ViGEmClient.dll" Condition="'$(Platform)' == 'ARM64'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Link>ViGEmClient.dll</Link>
+		</None>
 		<None Update="libs\$(Platform)\FakerInputWrapper\FakerInputDll.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>FakerInputDll.dll</Link>

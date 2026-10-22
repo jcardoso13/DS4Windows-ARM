@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http.Json;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace DS4WinWPF.DS4Forms.ViewModels
@@ -66,6 +67,17 @@ namespace DS4WinWPF.DS4Forms.ViewModels
 
         public bool RunUpdaterCheck(bool launch, out string upstreamVersion)
         {
+            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+            {
+                // The upstream updater only distributes x86/x64 builds.
+                upstreamVersion = string.Empty;
+                Process.Start(new ProcessStartInfo("https://github.com/jcardoso13/DS4Windows-ARM/releases")
+                {
+                    UseShellExecute = true
+                });
+                return false;
+            }
+
             string destPath = Path.Combine(Global.exedirpath, "DS4Updater.exe");
             bool updaterExists = File.Exists(destPath);
             upstreamVersion = DownloadUpstreamUpdaterVersion();

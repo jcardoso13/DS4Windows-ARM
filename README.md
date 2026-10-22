@@ -30,6 +30,33 @@ available in this source code from the COPYING file.
 ## Downloads
 
 - **[Main builds of DS4Windows](https://ds4-windows.com)**
+- This fork's GitHub releases include x64, x86, and native Windows ARM64 ZIPs.
+  Choose `DS4Windows_<version>_arm64.zip` for Windows 11 on ARM.
+
+### Windows ARM64 releases
+
+The release workflow builds ARM64 separately on a Windows ARM runner. It rebuilds
+ViGEmClient, its managed wrapper, FakerInputDll, FakerInputWrapper, and SharpOSC
+from pinned upstream source revisions rather than reusing x64 DLLs. Before
+uploading the ZIP, it checks the executable's ARM64 machine type and loads both
+native DLLs in an ARM64 process.
+
+Install the ARM64 .NET 8 Desktop Runtime and the ARM64-capable ViGEmBus driver.
+The optional bundled HidHide and FakerInput driver installers only support x64
+or x86, so those install options are disabled on ARM64. Use the default SendInput
+keyboard/mouse handler. Driver installation and controller operation still need
+testing on physical Windows ARM hardware. On ARM64, accepting an update opens
+this fork's releases page for a manual ZIP update instead of running the upstream
+x64-only updater.
+
+To rebuild the ARM64 dependencies locally, install Visual Studio 2022 with the
+ARM64 C++ build tools, a Windows SDK, CMake 3.24 or newer, and the .NET 8 SDK:
+
+```powershell
+cmake -S utils/arm64 -B bin/arm64-deps -G "Visual Studio 17 2022" -A ARM64
+cmake --build bin/arm64-deps --config Release
+dotnet publish DS4Windows/DS4WinWPF.csproj -c Release -r win-arm64 --self-contained false /p:Platform=ARM64 -o bin/arm64/Release/output
+```
 
 ## Install
 
@@ -40,8 +67,8 @@ Alternatively, you can download [`ds4w.bat`](https://github.com/ds4windowsapp/DS
 ## Requirements
 
 - Windows 10 or newer (Thanks Microsoft)
-- Microsoft .NET 8.0 Desktop Runtime. [x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x64-installer) or [x86](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x86-installer)
-- Visual C++ 2015-2022 Redistributable. [x64](https://aka.ms/vs/17/release/vc_redist.x64.exe) or [x86](https://aka.ms/vs/17/release/vc_redist.x86.exe)
+- Microsoft .NET 8.0 Desktop Runtime. [x64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x64-installer), [x86](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-x86-installer), or [ARM64](https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/runtime-desktop-8.0.0-windows-arm64-installer)
+- Visual C++ 2015-2022 Redistributable. [x64](https://aka.ms/vs/17/release/vc_redist.x64.exe), [x86](https://aka.ms/vs/17/release/vc_redist.x86.exe), or [ARM64](https://aka.ms/vs/17/release/vc_redist.arm64.exe)
 - [ViGEmBus](https://vigembusdriver.com/) driver (DS4Windows will install it for you)
 - **Sony** DualShock 4 or other supported controller
 - Connection method:
